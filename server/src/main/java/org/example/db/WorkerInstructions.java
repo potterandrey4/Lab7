@@ -39,7 +39,7 @@ public class WorkerInstructions {
         int id = worker.getId();
         try {
             if (workerExist(id)) {
-                logger.warn("Пользователь с такими данными уже существует");
+                logger.warn("Worker уже существует");
             } else {
                 PreparedStatement statement = connection.prepareStatement(ADD_WORKER_REQUEST);
 

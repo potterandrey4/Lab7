@@ -5,6 +5,7 @@ import org.example.collection.classes.Worker;
 import org.example.db.DatabaseHandler;
 import org.example.db.GetCredentials;
 import org.example.db.WorkerInstructions;
+import org.example.exceptions.ReadException;
 import org.example.messages.BaseMsg;
 import org.example.messages.MsgWithUser;
 import org.example.tools.CommandExecutor;
@@ -15,7 +16,7 @@ import java.util.LinkedList;
 
 public class ServerMain {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ReadException {
 
         // запуск сервера
         ServerConnect.connect();

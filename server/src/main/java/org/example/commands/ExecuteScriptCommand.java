@@ -1,6 +1,6 @@
 package org.example.commands;
 
-mport org.example.exceptions.ReadException;
+import org.example.exceptions.ReadException;
 import org.example.tools.CommandExecutor;
 
 public class ExecuteScriptCommand extends Command {
