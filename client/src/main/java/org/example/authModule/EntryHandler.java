@@ -6,6 +6,9 @@ import org.example.User;
 import org.example.io.InputHandler;
 import org.example.io.OutputHandler;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
 public class EntryHandler {
 
     private static int UID = -1;
@@ -15,7 +18,7 @@ public class EntryHandler {
         OutputHandler.println("Введите логин");
         user.setName(InputHandler.get());
         OutputHandler.println("Введите пароль");
-        user.setPswd(InputHandler.getPswd());
+        user.setPswd(hashPassword(InputHandler.getPswd()));
 
         return user;
     }
@@ -74,5 +77,33 @@ public class EntryHandler {
         }
 
         OutputHandler.println("Вы авторизованы");
+    }
+
+    private static String hashPassword(String password) {
+        try {
+            // Создаем объект MessageDigest с алгоритмом MD2
+            MessageDigest md = MessageDigest.getInstance("MD2");
+
+            // Преобразуем пароль в массив байтов
+            byte[] passwordBytes = password.getBytes();
+
+            // Вычисляем хэш пароля
+            byte[] hashBytes = md.digest(passwordBytes);
+
+            // Преобразуем хэш в строку шестнадцатеричного представления
+            StringBuilder hexString = new StringBuilder();
+            for (byte hashByte : hashBytes) {
+                String hex = Integer.toHexString(0xff & hashByte);
+                if (hex.length() == 1) {
+                    hexString.append('0');
+                }
+                hexString.append(hex);
+            }
+
+            return hexString.toString();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }
