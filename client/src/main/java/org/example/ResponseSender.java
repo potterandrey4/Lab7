@@ -17,7 +17,6 @@ import static org.example.ClientConnect.*;
 import static org.example.ClientConnect.serverPort;
 
 public class ResponseSender {
-    private final static int uId = EntryHandler.getUID();
     private static void sendData(Object o) {
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -39,11 +38,14 @@ public class ResponseSender {
 
 
     public static void sendMsg(String msg) {
+        int uId = EntryHandler.getUID();
+        System.err.println(uId);
         Msg response = new Msg(uId, msg);
         sendData(response);
     }
 
     public static void sendMsgWithArg(String msg, String arg) {
+        int uId = EntryHandler.getUID();
         MsgWithArg response = new MsgWithArg(uId, msg, arg);
         sendData(response);
     }

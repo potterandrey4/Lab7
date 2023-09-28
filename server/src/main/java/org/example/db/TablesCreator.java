@@ -36,9 +36,10 @@ public class TablesCreator {
     // создание таблицы с User'ами
     public static void createDbUserTable() throws SQLException {
 
-        String createTableSQL = "id serial primary key not null," +
+        String createTableSQL = "create table users " +
+                "(id serial primary key not null," +
                 "username varchar(50) not null," +
-                "pswd varchar(100) not null";
+                "pswd varchar(100) not null);";
 
         if (executeSQLScript(createTableSQL)) {
             logger.info("Таблица users была создана");

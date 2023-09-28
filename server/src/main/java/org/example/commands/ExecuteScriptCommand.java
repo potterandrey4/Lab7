@@ -1,6 +1,5 @@
 package org.example.commands;
 
-import org.example.exceptions.ReadException;
 import org.example.tools.CommandExecutor;
 
 public class ExecuteScriptCommand extends Command {
@@ -11,6 +10,5 @@ public class ExecuteScriptCommand extends Command {
     public void execute() {
     }
 
-    public void execute(String arg) throws ReadException {
-    }
 }
+

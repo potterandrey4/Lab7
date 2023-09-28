@@ -2,6 +2,7 @@ package org.example.messages;
 
 public class MsgWithArg extends BaseMsg {
     public MsgWithArg(int uId, String command, String arg) {
+        this.uId = uId;
         this.textMsg = command;
         this.arg = arg;
     }

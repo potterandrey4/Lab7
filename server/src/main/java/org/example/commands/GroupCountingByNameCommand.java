@@ -8,8 +8,8 @@ public class GroupCountingByNameCommand extends Command {
         super(commandExecutor, description, name);
     }
 
-    public void execute() {
-        commandExecutor.groupCountingByName();
+    public void execute(int uId) {
+        commandExecutor.groupCountingByName(uId);
     }
 }
 

@@ -19,14 +19,8 @@ public class WorkerInstructions {
     private static final Logger logger = LoggerFactory.getLogger(WorkerInstructions.class);
 
 
-    // шаблон запроса на добавление worker'a
-    private static final String ADD_WORKER_REQUEST = "INSERT INTO worker (user_id, workername, coord_x, coord_y," +
-            "creation_time, salary, worker_position, worker_status," +
-            "organisation_name, organisation_type, organisation_annualturnover)" +
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
-
     // добавление worker'a
-    public static boolean addWorker(int userId, Worker worker) {
+    public static int addWorker(Worker worker) {
         if (!TablesChecker.tableExists("worker")) {
             try {
                 TablesCreator.createDbWorkerTable();
@@ -35,51 +29,55 @@ public class WorkerInstructions {
             }
         }
 
-        boolean flag = false;
-        int id = worker.getId();
+        String ADD_WORKER_REQUEST = "INSERT INTO worker (user_id, workername, coord_x, coord_y," +
+                "creation_time, salary, worker_position, worker_status," +
+                "organisation_name, organisation_type, organisation_annualturnover)" +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)" +
+                "RETURNING id;";
+
+        int generatedId = -1;
         try {
-            if (workerExist(id)) {
-                logger.warn("Worker уже существует");
-            } else {
-                PreparedStatement statement = connection.prepareStatement(ADD_WORKER_REQUEST);
+            PreparedStatement statement = connection.prepareStatement(ADD_WORKER_REQUEST);
 
-                statement.setInt(1, userId);
-                statement.setString(2, worker.getName());
-                statement.setDouble(3, worker.getCoordinates().getX());
-                statement.setFloat(4, worker.getCoordinates().getY());
-                statement.setString(5, String.valueOf(worker.getCreationDate()));
-                statement.setLong(6, worker.getSalary());
-                statement.setString(7, String.valueOf(worker.getPosition()));
-                statement.setString(8, String.valueOf(worker.getStatus()));
-                statement.setString(9, worker.getOrganization().getFullName());
-                statement.setString(10, String.valueOf(worker.getOrganization().getType()));
-                statement.setFloat(11, worker.getOrganization().getAnnualTurnover());
+            statement.setInt(1, worker.getUserId());
+            statement.setString(2, worker.getName());
+            statement.setDouble(3, worker.getCoordinates().getX());
+            statement.setFloat(4, worker.getCoordinates().getY());
+            statement.setString(5, String.valueOf(worker.getCreationDate()));
+            statement.setLong(6, worker.getSalary());
+            statement.setString(7, String.valueOf(worker.getPosition()));
+            statement.setString(8, String.valueOf(worker.getStatus()));
+            statement.setString(9, worker.getOrganization().getFullName());
+            statement.setString(10, String.valueOf(worker.getOrganization().getType()));
+            statement.setFloat(11, worker.getOrganization().getAnnualTurnover());
 
-                statement.executeUpdate();
-                statement.close();
-                logger.info("Worker успешно добавлен");
-                flag = true;
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    generatedId = resultSet.getInt("id");
+                    logger.info("Worker успешно добавлен");
+                }
             }
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        return flag;
+        return generatedId;
     }
 
 
     // проверка на существование worker'a
-    private static boolean workerExist(int id) {
+    public static boolean workerExist(int id) {
         if (!TablesChecker.tableExists("worker")) {
             try {
                 TablesCreator.createDbWorkerTable();
             } catch (SQLException e) {
-                logger.warn("Не удалось восстановить таблицу worker");
+                logger.warn("Не удалось восстановить таблицу humans");
             }
         }
 
         boolean flag = false;
         try {
-            String query = "SELECT EXISTS(SELECT 1 FROM Users WHERE id = ?)";
+            String query = "SELECT EXISTS(SELECT 1 FROM worker WHERE id = ?)";
 
             try (PreparedStatement statement = connection.prepareStatement(query)) {
                 statement.setInt(1, id);
@@ -99,6 +97,14 @@ public class WorkerInstructions {
 
     // получение всех worker'ов с БД
     public static LinkedList<Worker> getAllWorkers() {
+        if (!TablesChecker.tableExists("users")) {
+            try {
+                TablesCreator.createDbUserTable();
+            } catch (SQLException e) {
+                logger.warn("Не удалось восстановить таблицу user");
+            }
+        }
+
         if (!TablesChecker.tableExists("worker")) {
             try {
                 TablesCreator.createDbWorkerTable();
@@ -147,13 +153,35 @@ public class WorkerInstructions {
 
 
     // изменение worker'a (доступ имеется только у создателя)
-    public static boolean updateWorker(int userId, Worker worker) {
-        return deleteWorker(userId, worker.getId()) && addWorker(userId, worker);
+    public static boolean updateWorker(Worker worker) {
+        String query = "UPDATE worker SET workername = ?, coord_x = ?, coord_y = ?, creation_time = ?, " +
+                "salary = ?, worker_position = ?, worker_status = ?, organisation_name = ?, " +
+                "organisation_type = ?, organisation_annualturnover = ? WHERE id = ?;";
+
+        int changedRows = 0;
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, worker.getName());
+            statement.setDouble(2, worker.getCoordinates().getX());
+            statement.setFloat(3, worker.getCoordinates().getY());
+            statement.setString(4, String.valueOf(worker.getCreationDate()));
+            statement.setLong(5, worker.getSalary());
+            statement.setString(6, String.valueOf(worker.getPosition()));
+            statement.setString(7, String.valueOf(worker.getStatus()));
+            statement.setString(8, worker.getOrganization().getFullName());
+            statement.setString(9, String.valueOf(worker.getOrganization().getType()));
+            statement.setFloat(10, worker.getOrganization().getAnnualTurnover());
+            statement.setInt(11, worker.getId());
+
+            changedRows = statement.executeUpdate();
+        } catch (SQLException e) {
+            logger.error("Произошла ошибка при изменении worker" + e.getMessage());
+        }
+        return changedRows == 1;
     }
 
 
     // удаление всех worker'ов для конкретного пользователя
-    public static boolean deleteAllWorkersForUser(int userId) {
+    public static boolean deleteAllWorkersForUser(int userId, int count) {
         if (!TablesChecker.tableExists("worker")) {
             try {
                 TablesCreator.createDbWorkerTable();
@@ -161,36 +189,24 @@ public class WorkerInstructions {
                 logger.warn("Не удалось восстановить таблицу worker");
             }
         }
-        String deleteTableSQL = "DELETE FROM worker WHERE user_id = ?";
-        boolean flag = false;
+
+        int rowsDeleted = 0;
+
         try {
-            PreparedStatement statement = connection.prepareStatement(deleteTableSQL);
-            statement.setInt(1, userId);
-            statement.executeUpdate();
-            statement.close();
-            flag = true;
+            String query = "DELETE FROM worker WHERE id IN (SELECT id FROM worker WHERE user_id = ? LIMIT ?)";
+
+            try (PreparedStatement statement = connection.prepareStatement(query)) {
+                statement.setInt(1, userId);
+                statement.setInt(2, count);
+
+                rowsDeleted = statement.executeUpdate();
+            }
         } catch (SQLException e) {
             logger.warn("Произошла ошибка в бд: " + e.getMessage());
         }
-        return flag;
+
+        return rowsDeleted > 0;
     }
-
-
-    // удаление всех worker'ов
-    public static boolean deleteAllWorkers() {
-        String deleteTableSQL = "DROP CASCADE worker";
-        boolean flag = false;
-        try {
-            PreparedStatement statement = connection.prepareStatement(deleteTableSQL);
-            statement.executeUpdate();
-            statement.close();
-            flag = true;
-        } catch (SQLException e) {
-            logger.warn("Произошла ошибка в бд: " + e.getMessage());
-        }
-        return flag;
-    }
-
 
     // заготовка удалятора с 2мя аргументами
     private static boolean deleteWithTwoArgs(String query, int userId, int id) {
@@ -202,31 +218,36 @@ public class WorkerInstructions {
             }
         }
 
-        boolean flag = false;
-        if (workerExist(id)) {
-            try {
-                PreparedStatement statement = connection.prepareStatement(query);
-                statement.setInt(1, userId);
-                statement.setInt(2, id);
-                statement.executeUpdate();
-                statement.close();
-                flag = true;
-            } catch (SQLException e) {
-                logger.warn("Произошла ошибка в бд: " + e.getMessage());
+        try {
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setInt(1, id);
+            statement.setInt(2, userId);
+
+            int rowsAffected = statement.executeUpdate();
+
+            // Проверяем, была ли удалена хотя бы одна запись
+            if (rowsAffected > 0) {
+                return true; // Успешное удаление
+            } else {
+                return false; // Запись не была найдена или не принадлежит пользователю
             }
+
+        } catch (SQLException e) {
+            logger.warn("Произошла ошибка в бд: " + e.getMessage());
+            return false;
+
         }
-        return flag;
     }
 
 
     // удаление worker'a (доступ имеется только у создателя)
     public static boolean deleteWorker(int userId, int id) {
-        String query = "DELETE FROM worker WHERE id = ? AND user_id = ?";
+        String query = "DELETE FROM worker WHERE id = ? AND user_id = ?;";
         return deleteWithTwoArgs(query, userId, id);
     }
 
     public static boolean removeGreaterWorkers(int userId, int id) {
-        String query = "DELETE FROM worker WHERE id >= ? AND user_id = ?";
+        String query = "DELETE FROM worker WHERE id >= ? AND user_id = ?;";
         return deleteWithTwoArgs(query, userId, id);
     }
 }

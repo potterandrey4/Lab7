@@ -9,7 +9,7 @@ public class HistoryCommand extends Command{
         super(commandExecutor, description, name);
     }
 
-    public void execute() {
-        commandExecutor.history();
+    public void execute(int uId) {
+        commandExecutor.history(uId);
     }
 }

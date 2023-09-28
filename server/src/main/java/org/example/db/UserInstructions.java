@@ -24,6 +24,13 @@ public class UserInstructions {
 
     // добавление пользователя
     public static int addUser(User user) {
+        if (!TablesChecker.tableExists("users")) {
+            try {
+                TablesCreator.createDbUserTable();
+            } catch (SQLException e) {
+                logger.warn("Не удалось восстановить таблицу worker");
+            }
+        }
         int generatedId = -1;
         try {
             if (userExist(user) >= 0) {

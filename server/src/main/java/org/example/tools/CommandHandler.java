@@ -15,7 +15,8 @@ public class CommandHandler {
     public static void handle(BaseMsg receivedCommand, CommandManager commandManager) throws ReadException {
         if (receivedCommand instanceof Msg msg) {
             String command = msg.getName();
-            commandManager.execute(command);
+            int uId = msg.getUid();
+            commandManager.execute(command, uId);
         } else if (receivedCommand instanceof MsgWithArg msgWithArg) {
             commandManager.execute(msgWithArg);
         } else if (receivedCommand instanceof MsgWithWorker msgWithWorker) {

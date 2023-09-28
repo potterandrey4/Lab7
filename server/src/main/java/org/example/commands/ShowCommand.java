@@ -8,8 +8,8 @@ public class ShowCommand extends Command {
         super(commandExecutor, description, name);
     }
 
-    public void execute() {
-        commandExecutor.show();
+    public void execute(int uId) {
+        commandExecutor.show(uId);
     }
 }
 

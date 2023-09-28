@@ -8,8 +8,8 @@ public class InfoCommand extends Command {
         super(commandExecutor, description, name);
     }
 
-    public void execute() {
-        commandExecutor.info();
+    public void execute(int uId) {
+        commandExecutor.info(uId);
     }
     
 }

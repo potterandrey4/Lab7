@@ -7,7 +7,7 @@ public class PrintFieldDescendingStatusCommand extends Command {
         super(commandExecutor, description, name);;
     }
 
-    public void execute() {
-        commandExecutor.printFieldDescendingStatus();
+    public void execute(int uId) {
+        commandExecutor.printFieldDescendingStatus(uId);
     }
 }

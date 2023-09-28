@@ -9,8 +9,8 @@ public class HelpCommand extends Command {
         super(commandExecutor, description, name);
     }
 
-    public void execute() {
-        commandExecutor.help();
+    public void execute(int uId) {
+        commandExecutor.help(uId);
     }
 }
 

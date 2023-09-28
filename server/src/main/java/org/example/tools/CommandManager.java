@@ -30,10 +30,18 @@ public class CommandManager {
         commands.put("execute_script", new ExecuteScriptCommand(executor, "Исполнить скрипт из файла", "execute_script"));
     }
 
-    public void execute(String name) {
+//    public void execute(String name) {
+//        try {
+//            commands.get(name).execute();
+//        } catch (NullPointerException e) {
+//            ResponseSender.sendCommand("Данной команды не найдено");
+//        }
+//    }
+
+    public void execute(String name, int uId) {
         try {
-            commands.get(name).execute();
-        } catch (NullPointerException e) {
+            commands.get(name).execute(uId);
+        } catch (NullPointerException | ReadException e) {
             ResponseSender.sendCommand("Данной команды не найдено");
         }
     }
@@ -45,14 +53,6 @@ public class CommandManager {
             ResponseSender.sendCommand("Данной команды не найдено");
         }
     }
-
-//    public void execute(String name, String arg) throws ReadException {
-//        try {
-//           commands.get(name).execute(arg);
-//        } catch (NullPointerException e) {
-//            ResponseSender.sendCommand("Данной команды не найдено");
-//        }
-//    }
 
     public void execute(String name, Worker worker) throws ReadException {
         try {

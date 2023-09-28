@@ -2,6 +2,7 @@ package org.example.commads;
 
 import org.example.RequestReader;
 import org.example.ResponseSender;
+import org.example.authModule.EntryHandler;
 import org.example.collection.classes.Worker;
 import org.example.io.OutputHandler;
 import org.example.tools.CreateWorker;
@@ -22,6 +23,7 @@ public class UpdateCommand extends Command {
         if (Boolean.parseBoolean(flag)) {
             Worker worker = CreateWorker.create();
             worker.setId(Integer.parseInt(id));
+            worker.setUserId(EntryHandler.getUID());
             ResponseSender.sendMsgWithWorker("update_by_id", worker);
             OutputHandler.println(RequestReader.read());
         } else {

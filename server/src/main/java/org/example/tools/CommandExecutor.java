@@ -6,7 +6,6 @@ import org.example.commands.Command;
 import org.example.commands.HistoryCommand;
 import org.example.db.WorkerInstructions;
 import org.example.messages.MsgWithArg;
-import org.example.tools.io.OutputHandler;
 import org.example.toolsForCollection.*;
 
 import java.time.LocalDateTime;
@@ -34,7 +33,7 @@ public class CommandExecutor {
         return list;
     }
 
-    public void help() {
+    public void help(int uId) {
         StringBuilder sb = new StringBuilder();
         for (Command element : CommandManager.getCommands().values()) {
             sb.append(element.description());
@@ -45,34 +44,39 @@ public class CommandExecutor {
         ResponseSender.sendCommand(sb.toString());
     }
 
-    public void exit() {
-    }
+    public void exit() {}
 
     public void add(Worker worker) {
         worker.setCreationDate(LocalDateTime.now());
 
-        collection.add(worker);
-        save(worker);
-        ResponseSender.sendCommand("Worker добавлен");
-        commandsList.add("add");
+        int generatedId = addWorker(worker);
+        if (generatedId >= 0) {
+            worker.setId(generatedId);
+            collection.add(worker);
+            ResponseSender.sendCommand("Worker добавлен");
+            commandsList.add("add");
+        }
+        else {
+            ResponseSender.sendCommand("Произошла ошибка, worker не был добавлен");
+        }
     }
 
-    public void show() {
+    public void show(int uId) {
         ShowCollection.show(collection);
         commandsList.add("show");
     }
 
-    public void clear(MsgWithArg msg) {
-        if (WorkerInstructions.deleteAllWorkersForUser(msg.getIntArg())) {
+    public void clear(int uId) {
+        if (WorkerInstructions.deleteAllWorkersForUser(uId, 1000000)) {
             collection = getAllWorkers();
             ResponseSender.sendCommand("Объекты, принадлежащие вам, удалены");
             commandsList.add("clear");
         } else {
-            ResponseSender.sendCommand("Произошла ошибка удаления ваших объектов");
+            ResponseSender.sendCommand("Ваших объектов в коллекции не найдено");
         }
     }
 
-    public void head() {
+    public void head(int uId) {
         if (checkerSizeCollection(collection)) {
             ResponseSender.sendCommand(collection.getFirst().toString());
         } else {
@@ -82,22 +86,22 @@ public class CommandExecutor {
     }
 
     public void removeById(MsgWithArg msg) {
-        try {
-            if (checkerSizeCollection(collection)) {
-                int lastLengthCollection = collection.size();
-                collection = RemoveById.remove(msg.getUid(), msg.getIntArg(), collection);
-                if (lastLengthCollection != collection.size()) {
-                    deleteWorker(msg.getUid(), msg.getIntArg());
+        if (checkerSizeCollection(collection)) {
+            try {
+                int uId = msg.getUid();
+                int id = msg.getIntArg();
+                if (deleteWorker(uId, id)) {
+                    collection = RemoveById.remove(id, collection);
                     ResponseSender.sendCommand("Элемент успешно удалён");
                     commandsList.add("remove_by_id");
                 } else {
-                    ResponseSender.sendCommand("Элемент с указанным ID не найден");
+                    ResponseSender.sendCommand("Элемента с заданным ID не найдено или он принадлежит не вам");
                 }
-            } else {
-                ResponseSender.sendCommand("Коллекция пуста");
+            } catch (NumberFormatException e) {
+                ResponseSender.sendCommand("Некорректный формат ID");
             }
-        } catch (NumberFormatException e) {
-            ResponseSender.sendCommand("Некорректный формат ID");
+        } else {
+            ResponseSender.sendCommand("Коллекция пуста");
         }
     }
 
@@ -107,13 +111,13 @@ public class CommandExecutor {
         try {
             boolean flag = false;
             if (checkerSizeCollection(collection)) {
-                for (Worker worker : collection) {
-                    if (Objects.equals(worker.getId(), id)) {
-                        collection = RemoveById.remove(uId, id, collection);
-                        save();
-                        flag = true;
-                        ResponseSender.sendCommand("true");
-                        break;
+                if (workerExist(id)) {
+                    for (Worker worker : collection) {
+                        if (Objects.equals(worker.getId(), id)) {
+                            flag = true;
+                            ResponseSender.sendCommand("true");
+                            break;
+                        }
                     }
                 }
             }
@@ -128,14 +132,19 @@ public class CommandExecutor {
 
     public void updateById(Worker worker) {
         worker.setCreationDate(LocalDateTime.now());
-        collection.add(worker);
-        ResponseSender.sendCommand("Объект успешно изменён");
-        save();
-        commandsList.add("update_by_id");
+        if (updateWorker(worker)) {
+            collection = RemoveById.remove(worker.getId(), collection);
+            collection.add(worker);
+            ResponseSender.sendCommand("Объект успешно изменён");
+            commandsList.add("update_by_id");
+        }
+        else {
+            ResponseSender.sendCommand("Произошла ошибка изменения worker'a");
+        }
     }
 
     // значимость статусов сотрудников: regular, probation, hired, fired
-    public void printFieldDescendingStatus() {
+    public void printFieldDescendingStatus(int uId) {
         // Если понимать формулировку "все используемые статусы в порядке убывания"
         if (checkerSizeCollection(collection)) {
             ResponseSender.sendCommand(PrintFieldDescending.print());
@@ -146,7 +155,7 @@ public class CommandExecutor {
         commandsList.add("print_field_descending_status");
     }
 
-    public void maxByStatus() {
+    public void maxByStatus(int uId) {
         if (checkerSizeCollection(collection)) {
             ResponseSender.sendCommand(statusSorter().elementAt(0).toString());
             commandsList.add("max_by_status");
@@ -155,16 +164,19 @@ public class CommandExecutor {
         }
     }
 
+
+    // по идее можно переписать RemoveGreater.remove() использовать его
     public void removeGreater(MsgWithArg msg) {
         if (checkerSizeCollection(collection)) {
             try {
-                int lastLengthCollection = collection.size();
-                collection = RemoveGreater.remove(msg.getIntArg(), collection);
-                if (lastLengthCollection != collection.size()) {
+                int uId = msg.getUid();
+                int id = msg.getIntArg();
+                if (removeGreaterWorkers(uId, id)) {
+                    collection = getAllWorkers();
                     ResponseSender.sendCommand("Элементы начиная с ID=" + msg.getIntArg() + " и старше удалены");
-                    save();
                     commandsList.add("remove_greater");
-                } else {
+                }
+                else {
                     ResponseSender.sendCommand("Элемента с заданным ID не найдено");
                 }
             } catch (NumberFormatException e) {
@@ -175,7 +187,7 @@ public class CommandExecutor {
         }
     }
 
-    public void info() {
+    public void info(int uId) {
         StringBuilder sb = new StringBuilder();
         sb.append("Информация о коллекции:\n\tТип: LinkedList\n\tКласс объектов: Worker\n");
         sb.append("\tКоличество элементов: ").append(collection.size()).append("\n\t");
@@ -185,7 +197,7 @@ public class CommandExecutor {
         commandsList.add("info");
     }
 
-    public void history() {
+    public void history(int uId) {
         commandsList.add("history");
         StringBuilder sb = new StringBuilder();
         if (commandsList.size() < HistoryCommand.number) {
@@ -198,7 +210,7 @@ public class CommandExecutor {
     }
 
     //group_counting_by_name
-    public void groupCountingByName() {
+    public void groupCountingByName(int uId) {
         if (checkerSizeCollection(collection)) {
             Stream<Worker> streamWorker = collection.stream();
             Map<String, Long> workerByName = streamWorker.collect(Collectors.groupingBy(
@@ -215,26 +227,6 @@ public class CommandExecutor {
             ResponseSender.sendCommand("Коллекция пуста");
         }
         commandsList.add("group_counting_by_name");
-    }
-
-    public void save(Worker worker) {
-        try {
-            if (WorkerInstructions.addWorker(worker.getUserId(), worker)) {
-                collection = getAllWorkers();
-                commandsList.add("save");
-            }
-        } catch (NullPointerException e) {
-            OutputHandler.printErr(e.getMessage());
-        }
-    }
-
-    // fictive temp method
-    public void save() {
-        deleteAllWorkers();
-        for (Worker worker : collection) {
-            WorkerInstructions.addWorker(worker.getUserId(), worker);
-        }
-        collection = getAllWorkers();
     }
 
 }

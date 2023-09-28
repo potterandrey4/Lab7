@@ -23,12 +23,11 @@ public class Command {
 
     public void execute(){}
 
-    public void execute(String arg) throws ReadException {
-        execute();
-    }
+    public void execute(int uId) throws ReadException {}
 
     public void execute(Worker worker) throws ReadException {}
 
     public void execute(MsgWithArg msg) throws ReadException {}
 
 }
+
