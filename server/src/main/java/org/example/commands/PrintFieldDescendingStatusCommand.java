@@ -8,6 +8,6 @@ public class PrintFieldDescendingStatusCommand extends Command {
     }
 
     public void execute(int uId) {
-        commandExecutor.printFieldDescendingStatus(uId);
+        commandExecutor.printFieldDescendingStatus();
     }
 }

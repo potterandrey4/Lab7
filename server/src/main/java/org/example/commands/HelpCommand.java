@@ -10,7 +10,7 @@ public class HelpCommand extends Command {
     }
 
     public void execute(int uId) {
-        commandExecutor.help(uId);
+        commandExecutor.help();
     }
 }
 

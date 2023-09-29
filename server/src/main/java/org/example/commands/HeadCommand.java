@@ -8,7 +8,7 @@ public class HeadCommand extends Command {
     }
 
     public void execute(int uId) {
-        commandExecutor.head(uId);
+        commandExecutor.head();
     }
 }
 

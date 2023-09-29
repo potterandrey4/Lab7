@@ -10,6 +10,6 @@ public class HistoryCommand extends Command{
     }
 
     public void execute(int uId) {
-        commandExecutor.history(uId);
+        commandExecutor.history();
     }
 }

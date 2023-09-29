@@ -33,7 +33,7 @@ public class CommandExecutor {
         return list;
     }
 
-    public void help(int uId) {
+    public void help() {
         StringBuilder sb = new StringBuilder();
         for (Command element : CommandManager.getCommands().values()) {
             sb.append(element.description());
@@ -61,7 +61,7 @@ public class CommandExecutor {
         }
     }
 
-    public void show(int uId) {
+    public void show() {
         ShowCollection.show(collection);
         commandsList.add("show");
     }
@@ -76,7 +76,7 @@ public class CommandExecutor {
         }
     }
 
-    public void head(int uId) {
+    public void head() {
         if (checkerSizeCollection(collection)) {
             ResponseSender.sendCommand(collection.getFirst().toString());
         } else {
@@ -144,7 +144,7 @@ public class CommandExecutor {
     }
 
     // значимость статусов сотрудников: regular, probation, hired, fired
-    public void printFieldDescendingStatus(int uId) {
+    public void printFieldDescendingStatus() {
         // Если понимать формулировку "все используемые статусы в порядке убывания"
         if (checkerSizeCollection(collection)) {
             ResponseSender.sendCommand(PrintFieldDescending.print());
@@ -155,7 +155,7 @@ public class CommandExecutor {
         commandsList.add("print_field_descending_status");
     }
 
-    public void maxByStatus(int uId) {
+    public void maxByStatus() {
         if (checkerSizeCollection(collection)) {
             ResponseSender.sendCommand(statusSorter().elementAt(0).toString());
             commandsList.add("max_by_status");
@@ -187,7 +187,7 @@ public class CommandExecutor {
         }
     }
 
-    public void info(int uId) {
+    public void info() {
         StringBuilder sb = new StringBuilder();
         sb.append("Информация о коллекции:\n\tТип: LinkedList\n\tКласс объектов: Worker\n");
         sb.append("\tКоличество элементов: ").append(collection.size()).append("\n\t");
@@ -197,7 +197,7 @@ public class CommandExecutor {
         commandsList.add("info");
     }
 
-    public void history(int uId) {
+    public void history() {
         commandsList.add("history");
         StringBuilder sb = new StringBuilder();
         if (commandsList.size() < HistoryCommand.number) {
@@ -210,7 +210,7 @@ public class CommandExecutor {
     }
 
     //group_counting_by_name
-    public void groupCountingByName(int uId) {
+    public void groupCountingByName() {
         if (checkerSizeCollection(collection)) {
             Stream<Worker> streamWorker = collection.stream();
             Map<String, Long> workerByName = streamWorker.collect(Collectors.groupingBy(

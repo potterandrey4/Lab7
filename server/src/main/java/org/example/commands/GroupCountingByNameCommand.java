@@ -9,7 +9,7 @@ public class GroupCountingByNameCommand extends Command {
     }
 
     public void execute(int uId) {
-        commandExecutor.groupCountingByName(uId);
+        commandExecutor.groupCountingByName();
     }
 }
 

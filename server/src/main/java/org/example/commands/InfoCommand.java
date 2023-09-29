@@ -9,7 +9,7 @@ public class InfoCommand extends Command {
     }
 
     public void execute(int uId) {
-        commandExecutor.info(uId);
+        commandExecutor.info();
     }
     
 }

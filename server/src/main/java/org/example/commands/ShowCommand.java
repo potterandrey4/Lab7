@@ -9,7 +9,7 @@ public class ShowCommand extends Command {
     }
 
     public void execute(int uId) {
-        commandExecutor.show(uId);
+        commandExecutor.show();
     }
 }
 

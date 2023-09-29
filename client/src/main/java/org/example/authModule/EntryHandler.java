@@ -75,7 +75,6 @@ public class EntryHandler {
                 UID = EntryHandler.logIn();
             }
         }
-
         OutputHandler.println("Вы авторизованы");
     }
 

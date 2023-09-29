@@ -8,5 +8,5 @@ public class MaxByStatusCommand extends Command {
         super(commandExecutor, description, name);
     }
 
-    public void execute(int uId) {commandExecutor.maxByStatus(uId);}
+    public void execute(int uId) {commandExecutor.maxByStatus();}
 }
