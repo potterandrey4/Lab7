@@ -11,14 +11,12 @@ import java.nio.channels.DatagramChannel;
 public class ServerConnect {
 
     static DatagramChannel serverChannel;
-    private static final int serverPort = 7777;
     private static final Logger logger = LoggerFactory.getLogger(ServerConnect.class);
 
     public static void connect() {
         try {
 
             serverChannel = DatagramChannel.open();
-            serverChannel.configureBlocking(false);
 
             InetSocketAddress serverAddress = new InetSocketAddress("localhost", 9823);
             serverChannel.bind(serverAddress);

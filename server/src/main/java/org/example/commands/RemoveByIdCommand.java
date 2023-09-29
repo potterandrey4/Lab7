@@ -10,7 +10,7 @@ public class RemoveByIdCommand extends Command {
     }
 
     public void execute() {
-        ResponseSender.sendCommand("Вы не ввели id");
+        ResponseSender.sendResponse("Вы не ввели id");
     }
 
     public void execute(MsgWithArg msg) {
@@ -18,7 +18,7 @@ public class RemoveByIdCommand extends Command {
             Integer.parseInt(msg.getArg());
             commandExecutor.removeById(msg);
         } catch (NumberFormatException e) {
-            ResponseSender.sendCommand("Введённый аргумент не является целочисленным");
+            ResponseSender.sendResponse("Введённый аргумент не является целочисленным");
         }
     }
 

@@ -16,7 +16,7 @@ public class ClientConnect {
             serverAddress = InetAddress.getByName("localhost");
             serverPort = 9823;
             clientSocket = new DatagramSocket();
-            clientSocket.setSoTimeout(3000); // Тайм-аут в 3 секунды
+            clientSocket.setSoTimeout(4000); // Тайм-аут в 3 секунды
 
         } catch (SocketException | UnknownHostException e) {
             throw new RuntimeException(e);

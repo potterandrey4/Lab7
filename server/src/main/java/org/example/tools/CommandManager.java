@@ -6,16 +6,17 @@ import org.example.commands.*;
 import org.example.exceptions.ReadException;
 import org.example.messages.MsgWithArg;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
-
+import java.util.Map;
 
 public class CommandManager {
-    private static final LinkedHashMap<String, Command> commands = new LinkedHashMap<>();
+    private static final Map<String, Command> commands = Collections.synchronizedMap(new LinkedHashMap<>());
 
     public CommandManager(CommandExecutor executor) {
         commands.put("add", new AddCommand(executor, "Добавить новый элемент в коллекцию", "add"));
         commands.put("help", new HelpCommand(executor, "Вывести справку по доступным командам", "help"));
-        commands.put("exit",new ExitCommand(executor,"Закрыть приложение", "exit"));
+        commands.put("exit", new ExitCommand(executor, "Закрыть приложение", "exit"));
         commands.put("show", new ShowCommand(executor, "Вывести все элементы коллекции", "show"));
         commands.put("clear", new ClearCommand(executor, "Удалить все элементы коллекции", "clear"));
         commands.put("head", new HeadCommand(executor, "Вывести первый элемент коллекции", "head"));
@@ -30,39 +31,44 @@ public class CommandManager {
         commands.put("execute_script", new ExecuteScriptCommand(executor, "Исполнить скрипт из файла", "execute_script"));
     }
 
-//    public void execute(String name) {
-//        try {
-//            commands.get(name).execute();
-//        } catch (NullPointerException e) {
-//            ResponseSender.sendCommand("Данной команды не найдено");
-//        }
-//    }
-
     public void execute(String name, int uId) {
         try {
-            commands.get(name).execute(uId);
-        } catch (NullPointerException | ReadException e) {
-            ResponseSender.sendCommand("Данной команды не найдено");
-        }
-    }
-
-    public void execute(MsgWithArg msg) throws ReadException {
-        try {
-            commands.get(msg.getName()).execute(msg);
+            try {
+                commands.get(name).execute(uId);
+            } catch (ReadException e) {
+                ResponseSender.sendResponse("Ошибка во время выполнения команды: " + e.getMessage());
+            }
         } catch (NullPointerException e) {
-            ResponseSender.sendCommand("Данной команды не найдено");
+            ResponseSender.sendResponse("Данной команды не найдено");
         }
     }
 
-    public void execute(String name, Worker worker) throws ReadException {
+    public void execute(MsgWithArg msg) {
         try {
-            commands.get(name).execute(worker);
+            try {
+                commands.get(msg.getName()).execute(msg);
+            } catch (ReadException e) {
+                ResponseSender.sendResponse("Ошибка во время выполнения команды: " + e.getMessage());
+            }
         } catch (NullPointerException e) {
-            ResponseSender.sendCommand("Данной команды не найдено");
+            ResponseSender.sendResponse("Данной команды не найдено");
         }
     }
 
-    public static LinkedHashMap<String, Command> getCommands() {
+    public void execute(String name, Worker worker) {
+        try {
+            try {
+                commands.get(name).execute(worker);
+            } catch (ReadException e) {
+                ResponseSender.sendResponse("Ошибка во время выполнения команды: " + e.getMessage());
+            }
+        } catch (NullPointerException e) {
+            ResponseSender.sendResponse("Данной команды не найдено");
+        }
+    }
+
+    public static Map<String, Command> getCommands() {
         return commands;
     }
+
 }

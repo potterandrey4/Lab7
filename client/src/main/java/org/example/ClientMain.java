@@ -8,7 +8,6 @@ import org.example.tools.CommandManager;
 import java.util.LinkedHashMap;
 
 import static org.example.authModule.EntryHandler.auth;
-import static org.example.authModule.EntryHandler.getUID;
 
 
 public class ClientMain {
@@ -19,7 +18,6 @@ public class ClientMain {
         LinkedHashMap<String, Command> commands = commandManager.getCommands();
 
         auth();
-        int userId = getUID();
 
         while (true) {
 

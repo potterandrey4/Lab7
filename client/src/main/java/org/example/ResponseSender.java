@@ -39,7 +39,6 @@ public class ResponseSender {
 
     public static void sendMsg(String msg) {
         int uId = EntryHandler.getUID();
-        System.err.println(uId);
         Msg response = new Msg(uId, msg);
         sendData(response);
     }

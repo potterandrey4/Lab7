@@ -19,9 +19,10 @@ public class ServerEntryHandler {
     public void defineExistUser(User user) {
         switch (user.getId()) {
             case -1 -> logIn(user);
-            case -2 -> signIn(user);
-            default -> {ResponseSender.sendCommand(null);
-            }
+            case -2 -> {
+                signIn(user);
+                logger.info("user \"" + user.getName() + "\" выполнил вход");}
+            default -> ResponseSender.sendResponse(null);
         }
     }
 
@@ -36,7 +37,7 @@ public class ServerEntryHandler {
         }
 
         int uId = addUser(user);
-        ResponseSender.sendCommand(String.valueOf(uId));
+        ResponseSender.sendResponse(String.valueOf(uId));
     }
 
     private void signIn(User user) {
@@ -49,7 +50,7 @@ public class ServerEntryHandler {
         }
 
         int uId = userExist(user);
-        ResponseSender.sendCommand(String.valueOf(uId));
+        ResponseSender.sendResponse(String.valueOf(uId));
     }
 
 

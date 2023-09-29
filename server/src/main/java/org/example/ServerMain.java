@@ -5,18 +5,20 @@ import org.example.collection.classes.Worker;
 import org.example.db.DatabaseHandler;
 import org.example.db.GetCredentials;
 import org.example.db.WorkerInstructions;
-import org.example.exceptions.ReadException;
 import org.example.messages.BaseMsg;
 import org.example.messages.MsgWithUser;
 import org.example.tools.CommandExecutor;
 import org.example.tools.CommandHandler;
 import org.example.tools.CommandManager;
 
-import java.util.LinkedList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ServerMain {
 
-    public static void main(String[] args) throws ReadException {
+    public static void main(String[] args) {
 
         // запуск сервера
         ServerConnect.connect();
@@ -31,8 +33,10 @@ public class ServerMain {
         DatabaseHandler dbHandler = new DatabaseHandler(jdbcURL, username, password);
         dbHandler.connect();
 
+        final ExecutorService processorThreadPool = Executors.newCachedThreadPool(); // Ваш пул для обработки запросов
+
         //блок, отвечающий за подготовку к работе с коллекцией
-        LinkedList<Worker> collection = WorkerInstructions.getAllWorkers();
+        List<Worker> collection = Collections.synchronizedList(WorkerInstructions.getAllWorkers());
 
         // блок, отвечающий за подготовку к работе с командами
         CommandExecutor commandExecutor = new CommandExecutor(collection);
@@ -42,12 +46,14 @@ public class ServerMain {
         // работа с командами
         while (true) {
             BaseMsg receivedCommand = RequestReader.readCommand();
-            if (receivedCommand instanceof MsgWithUser) {
-                ServerEntryHandler entryHandler = new ServerEntryHandler();
-                entryHandler.defineExistUser(((MsgWithUser) receivedCommand).getUser());
-            } else {
-                CommandHandler.handle(receivedCommand, commandManager);
-            }
+            processorThreadPool.submit(() -> {
+                if (receivedCommand instanceof MsgWithUser) {
+                    ServerEntryHandler entryHandler = new ServerEntryHandler();
+                    entryHandler.defineExistUser(((MsgWithUser) receivedCommand).getUser());
+                } else {
+                    CommandHandler.handle(receivedCommand, commandManager);
+                }
+            });
         }
     }
 }
