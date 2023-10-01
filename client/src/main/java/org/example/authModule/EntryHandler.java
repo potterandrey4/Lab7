@@ -17,7 +17,6 @@ public class EntryHandler {
         User user = new User();
         OutputHandler.println("Введите логин");
         user.setName(InputHandler.get());
-        OutputHandler.println("Введите пароль");
         user.setPswd(hashPassword(InputHandler.getPswd()));
 
         return user;
@@ -75,7 +74,7 @@ public class EntryHandler {
                 UID = EntryHandler.logIn();
             }
         }
-        OutputHandler.println("Вы авторизованы");
+        OutputHandler.println("Вы авторизованы. Ваш ID: " + UID);
     }
 
     private static String hashPassword(String password) {

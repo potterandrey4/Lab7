@@ -155,7 +155,8 @@ public class Worker implements Serializable, Comparable<Worker>  {
 
     @Override
     public String toString() {
-        return "Id:" + id +
+        return "userID: " + userId +
+                " | Id:" + id +
                 " | Имя: " + name + " | Координаты: " + coordinates +
                 " | Время создания: " + time() + " | ЗП: " + salary +
                 " | Позиция: " + position.toString() + " | Статус: " + status.toString() +

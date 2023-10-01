@@ -28,8 +28,8 @@ public class ServerMain {
         tool.prepareCredentials();
         String username = tool.getUserName();
         String password = tool.getUserPassword();
-        String jdbcURL = "jdbc:postgresql://localhost:5432/studs";      // локаль
-        //String jdbcURL = "jdbc:postgresql://pg:5432/studs";           // хелиос
+        //String jdbcURL = "jdbc:postgresql://localhost:5432/studs";      // локаль
+        String jdbcURL = "jdbc:postgresql://pg:5432/studs";           // helios
         DatabaseHandler dbHandler = new DatabaseHandler(jdbcURL, username, password);
         dbHandler.connect();
 
@@ -41,7 +41,6 @@ public class ServerMain {
         // блок, отвечающий за подготовку к работе с командами
         CommandExecutor commandExecutor = new CommandExecutor(collection);
         CommandManager commandManager = new CommandManager(commandExecutor);
-
 
         // работа с командами
         while (true) {

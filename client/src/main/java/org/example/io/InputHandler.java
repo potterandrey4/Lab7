@@ -25,6 +25,7 @@ public class InputHandler {
             return new String(passwordArray);
         }
         else {
+            OutputHandler.println("Введите пароль: ");
             return InputHandler.get();
         }
     }

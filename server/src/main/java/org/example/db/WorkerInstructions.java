@@ -135,7 +135,7 @@ public class WorkerInstructions {
                     worker.setStatus(Status.valueOf(resultSet.getString("worker_status").trim()));
                     worker.setOrganization(
                             new Organization(
-                                    resultSet.getString("organisation_name"),
+                                    resultSet.getString("organisation_name").trim(),
                                     resultSet.getFloat("organisation_annualturnover"),
                                     OrganizationType.valueOf(resultSet.getString("organisation_type").trim())
                             )
